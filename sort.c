@@ -8,7 +8,7 @@ int extraMemoryAllocated;
 void *Alloc(size_t sz)
 {
 	extraMemoryAllocated += sz;
-	size_t* ret = malloc(sizeof(size_t) + sz);
+	size_t* ret = Alloc(sizeof(size_t) + sz);
 	*ret = sz;
 	printf("Extra memory allocated, size: %ld\n", sz);
 	return &ret[1];
@@ -113,6 +113,7 @@ int parseData(char *inputFileName, int **ppData)
 	if (inFile)
 	{
 		fscanf(inFile,"%d\n",&dataSz);
+
 		*ppData = (int *)malloc(sizeof(int) * dataSz);
 		// Implement parse data block
 		if (*ppData == NULL)
@@ -178,7 +179,7 @@ int main(void)
 		mergeSort(pDataCopy, 0, dataSz - 1);
 		end = clock();
 		cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-		printf("\truntime\t\t\t: %.1lf\n",cpu_time_used);
+		printf("\truntime\t\t\t: %.10lf\n",cpu_time_used);
 		printf("\textra memory allocated\t: %d\n",extraMemoryAllocated);
 		printArray(pDataCopy, dataSz);
 		
