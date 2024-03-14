@@ -7,11 +7,23 @@ int extraMemoryAllocated;
 
 void *Alloc(size_t sz)
 {
-	extraMemoryAllocated += sz;
-	size_t* ret = Alloc(sizeof(size_t) + sz);
-	*ret = sz;
-	printf("Extra memory allocated, size: %ld\n", sz);
-	return &ret[1];
+    // Allocate memory for the size of the requested block plus the size of size_t
+    size_t* ret = (size_t*)malloc(sz + sizeof(size_t));
+    if (ret == NULL) {
+        printf("Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Store the size of the allocated block at the beginning of the memory block
+    *ret = sz;
+
+    // Increment the global variable to keep track of the extra memory allocated
+    extraMemoryAllocated += sz + sizeof(size_t);
+
+    printf("Extra memory allocated, size: %ld\n", sz);
+    
+    // Return a pointer to the memory block right after the size information
+    return (void*)(ret + 1);
 }
 
 void DeAlloc(void* ptr)
@@ -114,7 +126,7 @@ int parseData(char *inputFileName, int **ppData)
 	{
 		fscanf(inFile,"%d\n",&dataSz);
 
-		*ppData = (int *)malloc(sizeof(int) * dataSz);
+		*ppData = (int *)Alloc(sizeof(int) * dataSz);
 		// Implement parse data block
 		if (*ppData == NULL)
 		{
@@ -166,7 +178,7 @@ int main(void)
 		if (dataSz <= 0)
 			continue;
 		
-		pDataCopy = (int *)malloc(sizeof(int)*dataSz);
+		pDataCopy = (int *)Alloc(sizeof(int)*dataSz);
 	
 		printf("---------------------------\n");
 		printf("Dataset Size : %d\n",dataSz);
@@ -183,8 +195,8 @@ int main(void)
 		printf("\textra memory allocated\t: %d\n",extraMemoryAllocated);
 		printArray(pDataCopy, dataSz);
 		
-		free(pDataCopy);
-		free(pDataSrc);
+		DeAlloc(pDataCopy);
+		DeAlloc(pDataSrc);
 	}
 	
 }
